@@ -16,7 +16,7 @@ app.get('/', (req, res) => {
   console.log('work');
 });
 
-
+const jay = 'How are you';
 
 app.use(morgan('tiny'));
 app.use(bodyParser.urlencoded({extended: true}));
