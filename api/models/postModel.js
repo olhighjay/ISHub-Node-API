@@ -13,6 +13,11 @@ const postModel = new Schema(
       type: String,
       required: true
     },
+    category:  {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category', 
+      required: true
+    },
   }, {timestamps: true, 
     toJSON: { virtuals: true }, 
     toObject: { virtuals: true }

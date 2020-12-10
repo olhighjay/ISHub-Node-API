@@ -1,13 +1,15 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const Post = require('../models/postModel');
-const postsController = require('../controllers/postsController')(Post);
+const Category = require('../models/categoryModel');
+const postsController = require('../controllers/postsController')(Post, Category);
 
 
   const router = express.Router();
 
-  router.get('/posts', postsController.get);
-  router.post('/posts', postsController.post);
+  router.get('/', postsController.get);
+  router.post('/', postsController.post);
+  router.get('/:postId', postsController.getPostById);
 
 
 module.exports = router;
