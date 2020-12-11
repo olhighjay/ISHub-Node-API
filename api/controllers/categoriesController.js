@@ -48,20 +48,28 @@ function categoriesController(Category) {
   async function updateCategory(req, res, next){
     
     const id = req.params.categoryId;
-    const update = { name: req.body.name, description: req.body.description };
+    const update = req.body;
+    const keysArray = Object.keys(update)
+    // return res.send(keysArray);
     
     try{
-      const catg = await Category.findById(id);
+      const category = await Category.findById(id);
       // return res.send(catg);
-      if(!catg){
+      if(!category){
         return res.status(404).json({
           error: "Category not found"
         });
       }
+
+      keysArray.forEach(key => {
+        category[key] = update[key];
+      })
+
+      await category.save();
       
-      const category = await Category.findOneAndUpdate(id, {$set: {name: req.body.newName, description: req.body.newDescription}}, {
-        new: true
-      });
+      // const category = await Category.findOneAndUpdate(id, {$set: {name: req.body.newName, description: req.body.newDescription}}, {
+      //   new: true
+      // });
       
       res.status(201).json({
         message: "Category updated successfully",
@@ -88,7 +96,7 @@ function categoriesController(Category) {
         }
         await category.remove();
         res.status(200).json({
-          message: "Product deleted successfully",
+          message: "Category deleted successfully",
           request: {
             type: 'POST',
             description: 'Create new category', 
