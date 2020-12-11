@@ -34,6 +34,8 @@ function postsController(Post, Category) {
   }
 
   async function post(req, res, next){
+    console.log(req.file);
+    // return res.send(req.file);
     const id = req.body.categoryId;
     console.log(id);
     try{
@@ -49,6 +51,7 @@ function postsController(Post, Category) {
         title: req.body.title,
         body: req.body.body,
         category: id,
+        coverImage: req.file.path
       });
       await post.save();
       console.log(post);

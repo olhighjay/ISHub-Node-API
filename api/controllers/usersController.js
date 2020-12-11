@@ -129,28 +129,34 @@ function usersController(User) {
   };
 
   async function deleteUser(req, res, next){
-    const id = req.params.categoryId;
+    const id = req.params.userId;
     try{
-        const category = await Category.findById(id);
-        if(!category){
+        const user = await User.findById(id);
+        if(!user){
           return res.status(404).json({
-            error: "Category does not exist"
+            error: "User does not exist"
           });
         }
-        await category.remove();
+        await user.remove();
         res.status(200).json({
-          message: "Product deleted successfully",
+          message: "User deleted successfully",
           request: {
             type: 'POST',
-            description: 'Create new category', 
-            url: 'http://localhost:4000/api/categories/',
-            body: {name: 'String, required', description: 'String'}
+            description: 'Create new user', 
+            url: 'http://localhost:4000/api/users/',
+            body: {fullname: 'String, required',
+            username: 'String, required',
+            email: 'String, required, unique',
+            password: 'String, required',
+          }
           }
         });
     }
     catch(err) {
       console.log(err);
-      res.status(500).json({error: err});
+      res.status(500).json({
+        error: err.message
+      });
     };
   }
 

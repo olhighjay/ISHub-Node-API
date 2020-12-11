@@ -14,8 +14,11 @@ const userRouter = require('./api/routes/userRoutes');
 
 
 app.use(morgan('tiny'));
+//make the folder public
+app.use('/api/public/images', express.static('api/public/images'))
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
+
 
 
 

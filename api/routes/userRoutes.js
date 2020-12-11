@@ -9,6 +9,7 @@ const usersController = require('../controllers/usersController')(User);
   router.get('/', usersController.get);
   router.post('/', usersController.signUp);
   router.get('/:userId', usersController.getUserById);
+  router.delete('/:userId', usersController.deleteUser);
 
 
 module.exports = router;

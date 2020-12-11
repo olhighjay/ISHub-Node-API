@@ -18,6 +18,7 @@ const postModel = new Schema(
       ref: 'Category', 
       required: true
     },
+    coverImage: {type: String}
   }, {timestamps: true, 
     toJSON: { virtuals: true }, 
     toObject: { virtuals: true }
