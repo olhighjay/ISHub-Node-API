@@ -48,27 +48,31 @@ function categoriesController(Category) {
   async function updateCategory(req, res, next){
     
     const id = req.params.categoryId;
-    const updateOps = {};
-    for (const ops of req.body){
-      updateOps[ops.propName] = ops.value;
-    }
+    const update = { name: req.body.name, description: req.body.description };
+    
     try{
-      // const category = await Post.findById(id);
+      const catg = await Category.findById(id);
+      // return res.send(catg);
+      if(!catg){
+        return res.status(404).json({
+          error: "Category not found"
+        });
+      }
       
-      const category = await Category.update({_id: id}, { $set: updateOps});
-    if(!category){
-      return res.status(404).json({
-        error: "Category not found"
+      const category = await Category.findOneAndUpdate(id, {$set: {name: req.body.newName, description: req.body.newDescription}}, {
+        new: true
       });
-    }
+      
       res.status(201).json({
-        message: "Category updated successfully"
+        message: "Category updated successfully",
+        name: category.name, // 'Jean-Luc Picard'
+        description: category.description
       });  
     }
     catch(err){
       console.log(err.message);
       res.status(500).json({
-        error: err.stack
+        error: err.message
       });
     }
   };

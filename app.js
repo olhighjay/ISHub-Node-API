@@ -9,6 +9,7 @@ const chalk = require('chalk');
 
 const postRouter = require('./api/routes/postRoutes');
 const categoryRouter = require('./api/routes/categoryRoutes');
+const userRouter = require('./api/routes/userRoutes');
 
 
 
@@ -21,6 +22,7 @@ app.use(bodyParser.json());
 
 app.use('/api/posts', postRouter);
 app.use('/api/categories', categoryRouter);
+app.use('/api/users', userRouter);
 
 
 
