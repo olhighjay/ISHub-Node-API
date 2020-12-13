@@ -144,11 +144,12 @@ function usersController(User) {
             type: 'POST',
             description: 'Create new user', 
             url: 'http://localhost:4000/api/users/',
-            body: {fullname: 'String, required',
-            username: 'String, required',
-            email: 'String, required, unique',
-            password: 'String, required',
-          }
+            body: {
+              fullname: 'String, required',
+              username: 'String, required',
+              email: 'String, required, unique',
+              password: 'String, required',
+            }
           }
         });
     }

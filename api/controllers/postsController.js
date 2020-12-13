@@ -2,6 +2,7 @@ const chalk = require('chalk');
 const mongoose = require('mongoose');
 const { populate } = require('../models/postModel');
 const debug = require('debug')('app:postsController');
+const fs = require('fs'); 
 
 function postsController(Post, Category) {
   async function get(req, res, next){
@@ -34,10 +35,9 @@ function postsController(Post, Category) {
   }
 
   async function post(req, res, next){
-    console.log(req.file);
-    // return res.send(req.file);
-    const id = req.body.categoryId;
-    console.log(id);
+    // console.log(req.file);
+    const id = req.body.category;
+    
     try{
       const category = await Category.findById(id);
       console.log(category);
@@ -116,10 +116,118 @@ function postsController(Post, Category) {
     }
   };
 
+  async function updatePost(req, res){
+   
+    const id = req.params.postId;
+    const update = req.body;
+    const keysArray = Object.keys(update)
+   
+    try{
+      const post = await Post.findById(id);
+      // return res.send(catg);
+      if(!post){
+        return res.status(404).json({
+          error: "Post not found"
+        });
+      }
+
+      // Check if the category in the request is valid
+      if(update.category){
+        const catg = await Category.findById(update.category);
+        if(!catg){
+          throw new Error('Invalid category');
+        }
+      }
+      // console.log(catg);
+
+      keysArray.forEach(key => {
+        post[key] = update[key];
+      })
+      //Update cover image
+      if(req.file){
+        // delete the image from storage
+        fs.unlink( post.coverImage, err => { 
+          if(err){
+            console.log(err);
+          }
+        });
+        // upload the image from  the database
+        post.coverImage = req.file.path;
+      }
+
+      await post.save();
+      
+      // const category = await Category.findOneAndUpdate(id, {$set: {name: req.body.newName, description: req.body.newDescription}}, {
+      //   new: true
+      // });
+      
+      res.status(201).json({
+        message: "Post updated successfully",
+        post: post
+      });  
+    }
+    catch(err){
+      console.log(err.message);
+      res.status(500).json({
+        error: err.message
+      });
+    }
+  };
+
+  async function deletePost(req, res, next){
+    const id = req.params.postId;
+    try{
+     
+      const post = await Post.findById(id);
+        if(post){
+          if(post.coverImage){
+            // delete the image from storage
+            fs.unlink( post.coverImage, err => { 
+              if(err){
+                console.log(err);
+              }
+            });
+          }
+          await post.remove();
+          res.status(200).json({
+            message: "Post deleted successfully",
+            request: {
+              type: 'POST',
+              description: 'Create new post', 
+              url: 'http://localhost:4000/api/posts/',
+              body: {
+                title: 'String, required',
+                body: 'String, required',
+                category: 'String, required',
+                coverImage: 'image, max-5mb, jpg-jpeg-png',
+              }
+            }
+          });
+        }
+        else{
+          res.status(404).json({
+            error: "Post not found"
+          });
+
+        }
+        
+      
+     
+    }
+    catch(err){
+      console.log(err.message);
+      res.status(500).json({
+        error: err.stack
+      });
+    }
+  }
+
   return {
     get,
     post,
-    getPostById
+    getPostById,
+    updatePost,
+    deletePost
   };
 }
 

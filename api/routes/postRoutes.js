@@ -13,7 +13,8 @@ const storage = multer.diskStorage({
     cb(null, './api/public/images/cover_images');
   },
   filename: function(req, file, cb){
-    cb(null, file.originalname);
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    cb(null, uniqueSuffix + '-' + file.originalname);
   }
 });
 
@@ -39,6 +40,8 @@ const upload = multer({
   router.get('/', postsController.get);
   router.post('/', upload.single('coverImage'), postsController.post);
   router.get('/:postId', postsController.getPostById);
+  router.post('/:postId', upload.single('coverImage'), postsController.updatePost);
+  router.delete('/:postId', postsController.deletePost);
 
 
 module.exports = router;
