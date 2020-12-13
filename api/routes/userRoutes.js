@@ -7,8 +7,9 @@ const usersController = require('../controllers/usersController')(User);
   const router = express.Router();
 
   router.get('/', usersController.get);
-  router.post('/', usersController.signUp);
+  router.post('/register', usersController.signUp);
   router.get('/:userId', usersController.getUserById);
+  router.post('/:userId', usersController.updateUser);
   router.delete('/:userId', usersController.deleteUser);
 
 

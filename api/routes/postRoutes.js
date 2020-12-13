@@ -13,8 +13,8 @@ const storage = multer.diskStorage({
     cb(null, './api/public/images/cover_images');
   },
   filename: function(req, file, cb){
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-    cb(null, uniqueSuffix + '-' + file.originalname);
+    const uniquePrefix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+    cb(null, uniquePrefix + '-' + file.originalname);
   }
 });
 

@@ -64,26 +64,33 @@ function usersController(User) {
 
   async function updateUser(req, res, next){
     
-    const id = req.params.categoryId;
-    const update = { name: req.body.name, description: req.body.description };
-    
+    const id = req.params.userId;
+    const update = req.body;
+    const keysArray = Object.keys(update)
+   
     try{
-      const catg = await Category.findById(id);
+      const user = await User.findById(id);
       // return res.send(catg);
-      if(!catg){
+      if(!user){
         return res.status(404).json({
-          error: "Category not found"
+          error: "User not found"
         });
       }
-      
-      const category = await Category.findOneAndUpdate(id, {$set: {name: req.body.newName, description: req.body.newDescription}}, {
-        new: true
+
+      keysArray.forEach(key => {
+        user[key] = update[key];
       });
+
+      if(update.password){
+        const hashedPassword = await bcrypt.hash(req.body.password, 10);
+        user.password = hashedPassword;
+      }
+
+      await user.save();
       
       res.status(201).json({
-        message: "Category updated successfully",
-        name: category.name, // 'Jean-Luc Picard'
-        description: category.description
+        message: "User updated successfully",
+        post: user
       });  
     }
     catch(err){
