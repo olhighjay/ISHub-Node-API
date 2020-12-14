@@ -1,6 +1,8 @@
 const chalk = require('chalk');
 const mongoose = require('mongoose');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+
 
 function usersController(User) {
   async function get(req, res, next){
@@ -61,6 +63,44 @@ function usersController(User) {
     
     
   }
+
+  async function signIn(req, res, next){
+    
+    try{
+      //check for email uniqueness
+      const user = await User.findOne({ email: req.body.email});
+      if(!user){
+        return res.status(401).json({
+          message: 'Auth Failed'
+        });
+      }
+      
+      const verified = await bcrypt.compare(req.body.password, user.password)
+      console.log(chalk.blue(verified));
+      if(!verified){
+        return res.status(401).json({
+          message: 'Auth Failed'
+        });
+      }
+      const token = jwt.sign({
+        userId: user._id
+        }, process.env.JWT_KEY,
+        {
+          expiresIn: "1h"
+        }
+      );
+      return res.status(200).json({
+        message: 'Auth Successful',
+        token:token
+      });
+    }
+    catch(err) {
+      console.log(err);
+      res.status(500).json({
+        error: err.message
+      });
+    };
+  };
 
   async function updateUser(req, res, next){
     
@@ -173,6 +213,7 @@ function usersController(User) {
   return {
     get,
     signUp,
+    signIn,
     updateUser,
     getUserById,
     deleteUser
