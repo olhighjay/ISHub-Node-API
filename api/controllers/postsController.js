@@ -1,6 +1,5 @@
 const chalk = require('chalk');
 const mongoose = require('mongoose');
-const { populate } = require('../models/postModel');
 const debug = require('debug')('app:postsController');
 const fs = require('fs'); 
 
@@ -40,21 +39,24 @@ function postsController(Post, Category) {
     
     try{
       const category = await Category.findById(id);
-      console.log(category);
+      // console.log(category);
         if(!category){
           return res.status(404).json({
             error: "Category does not exist"
           });
         }
+        // console.log(req.file);
       const post = new Post({
         _id: new mongoose.Types.ObjectId(),
         title: req.body.title,
         body: req.body.body,
-        category: id,
-        coverImage: req.file.path
+        category: id
       });
+      if(req.file){
+        post.coverImage= req.file.path;
+      }
       await post.save();
-      console.log(post);
+      // console.log(post);
       res.status(201).json({
         message: 'Post was created successfully',
         createdProduct: {

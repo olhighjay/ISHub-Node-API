@@ -24,6 +24,10 @@ const userModel = new Schema(
       required: true,
       minlength:10
     },
+    role: {
+      type: String,
+      required: true
+    }
   }
 );
 

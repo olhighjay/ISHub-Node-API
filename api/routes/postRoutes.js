@@ -4,6 +4,8 @@ const mongoose = require('mongoose');
 const multer = require('multer');
 const Post = require('../models/postModel');
 const Category = require('../models/categoryModel');
+const authWare = require('../middlewares/auth');
+const adminWare = require('../middlewares/adminAuth');
 const postsController = require('../controllers/postsController')(Post, Category);
 const router = express.Router();
 
@@ -40,9 +42,9 @@ const upload = multer({
 
 
   router.get('/', postsController.get);
-  router.post('/', upload.single('coverImage'), postsController.post);
+  router.post('/', adminWare, upload.single('coverImage'), postsController.post);
   router.get('/:postId', postsController.getPostById);
-  router.post('/:postId', upload.single('coverImage'), postsController.updatePost);
+  router.post('/:postId', authWare, upload.single('coverImage'), postsController.updatePost);
   router.delete('/:postId', postsController.deletePost);
 
 

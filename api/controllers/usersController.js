@@ -40,13 +40,13 @@ function usersController(User) {
     
       const user = new User({
         _id: new mongoose.Types.ObjectId(),
-        fullName: req.body.fullname,
+        fullName: req.body.fullName,
         username: req.body.username,
         email: req.body.email,
-        password: hashedPassword
+        password: hashedPassword,
+        role: req.body.role
       });
       await user.save();
-      console.log(user);
       res.status(201).json({
         message: 'User was created successfully',
         createdCategory: {
@@ -83,15 +83,17 @@ function usersController(User) {
         });
       }
       const token = jwt.sign({
+        role: user.role,
         userId: user._id
         }, process.env.JWT_KEY,
         {
-          expiresIn: "1h"
+          expiresIn: "24h"
         }
       );
       return res.status(200).json({
         message: 'Auth Successful',
-        token:token
+        token:token,
+        user: user
       });
     }
     catch(err) {
