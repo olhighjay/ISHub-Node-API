@@ -18,6 +18,11 @@ const postModel = new Schema(
       ref: 'Category', 
       required: true
     },
+    author:  {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User', 
+      required: true
+    },
     coverImage: {type: String}
   }, {timestamps: true, 
     toJSON: { virtuals: true }, 

@@ -12,7 +12,7 @@ const postRouter = require('./api/routes/postRoutes');
 const categoryRouter = require('./api/routes/categoryRoutes');
 const userRouter = require('./api/routes/userRoutes');
 
-
+const azzza = "meme";
 
 app.use(morgan('tiny'));
 //make the folder public

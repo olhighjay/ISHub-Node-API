@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 
-function usersController(User) {
+function usersController(User, Post) {
   async function get(req, res, next){
     try{
         const users = await User.find();
@@ -150,11 +150,15 @@ function usersController(User) {
       const user = await User.findById(id);
       // .select("product quantity _id")
       // const user = populate('user');
-    
-        console.log("From database", user);
+      const posts = await Post.find({author: user._id}).select("title")
+        console.log(posts);
         if(user){
           res.status(200).json({
             user: user,
+            writtenPosts: {
+              count: posts.length,
+              posts
+            },
             request: {
               type: 'GET',
               description: 'Get all the users', 

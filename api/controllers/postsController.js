@@ -6,20 +6,37 @@ const fs = require('fs');
 function postsController(Post, Category) {
   async function get(req, res, next){
     try{
-        const posts = await Post.find().populate("category");;
+        const posts = await Post.find().populate(["author", "category"]);
         // const category = await populate("category");
         console.log(posts);
         const response = {
         count: posts.length,
           posts: posts.map(post => {
-            return {
-              title: post.title,
-              body: post.body,
-              category: post.category,
-              _id: post._id,
-              request: {
-                type: 'GET',
-                url: 'http://localhost:4000/api/orders/' + post._id
+            if(post.author){
+              return {
+                Id: post.id,
+                Title: post.title,
+                Body: post.body,
+                coverImage: post.coverImage,
+                createdAt: post.createdAt,
+                updatedAt: post.updatedAt,
+                Category: post.category,
+                Author: {
+                  Id: post.author.id,
+                  Username: post.author.username
+                },
+                request: {
+                  type: 'GET',
+                  url: 'http://localhost:4000/api/posts/' + post._id
+                }
+              }
+            }else{
+              return {
+                Post: post,
+                request: {
+                  type: 'GET',
+                  url: 'http://localhost:4000/api/posts/' + post._id
+                }
               }
             }
           })
@@ -55,8 +72,10 @@ function postsController(Post, Category) {
       if(req.file){
         post.coverImage= req.file.path;
       }
+      post.user = req.userData.userId
       await post.save();
-      // console.log(post);
+      console.log(post);
+      console.log(post.user);
       res.status(201).json({
         message: 'Post was created successfully',
         createdProduct: {
@@ -64,6 +83,7 @@ function postsController(Post, Category) {
           body: post.body,
           category: post.category,
           _id: post._id,
+          user: post.user,
           request: {
             type: 'GET',
             url: 'http://localhost:4000/api/posts/' + post._id

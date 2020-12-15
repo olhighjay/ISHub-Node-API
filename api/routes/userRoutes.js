@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const { check, validationResult } = require("express-validator");
 const User = require('../models/userModel');
-const usersController = require('../controllers/usersController')(User);
+const Post = require('../models/postModel');
+const usersController = require('../controllers/usersController')(User, Post);
 
   const router = express.Router();
 
