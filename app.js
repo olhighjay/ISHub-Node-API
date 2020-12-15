@@ -13,6 +13,7 @@ const categoryRouter = require('./api/routes/categoryRoutes');
 const userRouter = require('./api/routes/userRoutes');
 
 const azzza = "meme";
+const rubby = "meme";
 
 app.use(morgan('tiny'));
 //make the folder public
