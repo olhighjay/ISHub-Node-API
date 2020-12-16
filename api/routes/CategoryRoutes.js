@@ -1,6 +1,9 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const Category = require('../models/categoryModel');
+const authWare = require('../middlewares/auth');
+const adminWare = require('../middlewares/adminAuth');
+const postWare = require('../middlewares/self-postAuth');
 const categoriesController = require('../controllers/categoriesController')(Category);
 
 
@@ -8,9 +11,9 @@ const categoriesController = require('../controllers/categoriesController')(Cate
 
   
   router.get('/', categoriesController.get);
-  router.post('/', categoriesController.post);
-  router.post('/:categoryId', categoriesController.updateCategory);
-  router.delete('/:categoryId', categoriesController.deleteCategory);
+  router.post('/', adminWare, categoriesController.post);
+  router.post('/:categoryId', adminWare, categoriesController.updateCategory);
+  router.delete('/:categoryId', adminWare, categoriesController.deleteCategory);
 
   
 

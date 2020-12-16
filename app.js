@@ -12,9 +12,6 @@ const postRouter = require('./api/routes/postRoutes');
 const categoryRouter = require('./api/routes/categoryRoutes');
 const userRouter = require('./api/routes/userRoutes');
 
-const azzza = "meme";
-const rubby = "meme";
-
 app.use(morgan('tiny'));
 //make the folder public
 app.use('/api/public/images', express.static('api/public/images'))

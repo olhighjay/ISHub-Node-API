@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const debug = require('debug')('app:postsController');
 const fs = require('fs'); 
 
-function postsController(Post, Category) {
+function postsController(Post, Category, User) {
   async function get(req, res, next){
     try{
         const posts = await Post.find().populate(["author", "category"]);
@@ -13,7 +13,7 @@ function postsController(Post, Category) {
         count: posts.length,
           posts: posts.map(post => {
             if(post.author){
-              return {
+              return res.status(200).json({
                 Id: post.id,
                 Title: post.title,
                 Body: post.body,
@@ -29,15 +29,15 @@ function postsController(Post, Category) {
                   type: 'GET',
                   url: 'http://localhost:4000/api/posts/' + post._id
                 }
-              }
+              });
             }else{
-              return {
+              return res.status(200).json({
                 Post: post,
                 request: {
                   type: 'GET',
                   url: 'http://localhost:4000/api/posts/' + post._id
                 }
-              }
+              });
             }
           })
         };
@@ -105,20 +105,39 @@ function postsController(Post, Category) {
     const id = req.params.postId;
     try{
      
-      const post = await Post.findById(id);
+      const post = await Post.findById(id).populate(["author", "category"]);
       // .select("product quantity _id")
       // const user = populate('user');
     
         console.log("From database", post);
         if(post){
-          res.status(200).json({
-            post: post,
-            request: {
-              type: 'GET',
-              description: 'Get all the posts', 
-              url: 'http://localhost:4000/api/posts/'
-            }
-          });
+          if(post.author){
+            return res.status(200).json({
+              Id: post.id,
+              Title: post.title,
+              Body: post.body,
+              coverImage: post.coverImage,
+              createdAt: post.createdAt,
+              updatedAt: post.updatedAt,
+              Category: post.category,
+              Author: {
+                Id: post.author._id,
+                Username: post.author.username
+              },
+              request: {
+                type: 'GET',
+                url: 'http://localhost:4000/api/posts/' + post._id
+              }             
+            })
+          }else{
+            return res.status(200).json({
+              Post: post,
+              request: {
+                type: 'GET',
+                url: 'http://localhost:4000/api/posts/' + post._id
+              }
+            });
+          }
         }
         else{
           res.status(404).json({
@@ -160,7 +179,14 @@ function postsController(Post, Category) {
           throw new Error('Invalid category');
         }
       }
-      // console.log(catg);
+      console.log(update.author);
+      // Check if the author in the request is valid
+      if(update.author){
+        const author = await User.findById(update.author);
+        if(!author){
+          throw new Error('Invalid Author');
+        }
+      }
 
       keysArray.forEach(key => {
         post[key] = update[key];
