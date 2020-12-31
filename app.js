@@ -1,5 +1,6 @@
 require('./api/db/mongoose');
 require("dotenv").config();
+const config = require('./api/db/_config');
 const express = require('express');
 const app = express();
 const morgan =  require('morgan');
@@ -68,6 +69,9 @@ const port = process.env.PORT || 3000;
 
 app.server = app.listen(port, () => {
   console.log(chalk.blue('Running on port ' + port));
+  console.log(app.settings.env);
+  // console.log(JSON.stringify(process.env.NODE_ENV));
+  console.log(config["mongoURI"][process.env.NODE_ENV]);
 });
 
 

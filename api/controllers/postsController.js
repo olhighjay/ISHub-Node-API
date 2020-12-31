@@ -2,48 +2,78 @@ const chalk = require('chalk');
 const mongoose = require('mongoose');
 const debug = require('debug')('app:postsController');
 const fs = require('fs'); 
+const { response } = require('express');
+const { query } = require('express-validator');
 
 function postsController(Post, Category, User) {
   async function get(req, res, next){
     try{
-        const posts = await Post.find().populate(["author", "category"]);
-        // const category = await populate("category");
-        console.log(posts);
-        const response = {
-        count: posts.length,
-          posts: posts.map(post => {
-            if(post.author){
-              return res.status(200).json({
-                Id: post.id,
-                Title: post.title,
-                Body: post.body,
-                coverImage: post.coverImage,
-                createdAt: post.createdAt,
-                updatedAt: post.updatedAt,
-                Category: post.category,
-                Author: {
-                  Id: post.author.id,
-                  Username: post.author.username
-                },
-                request: {
-                  type: 'GET',
-                  url: 'http://localhost:4000/api/posts/' + post._id
-                }
-              });
-            }else{
-              return res.status(200).json({
-                Post: post,
-                request: {
-                  type: 'GET',
-                  url: 'http://localhost:4000/api/posts/' + post._id
-                }
-              });
+        // const posts = await Post.find().populate(["author", "category"]);
+      const posts = await Post.find().populate("author").populate("category").sort({
+        createdAt : -1 //descending order
+     }).
+      exec();
+      // console.log(req.query);
+      if(req.query.category){
+        query.category = req.query.category;
+      }
+      let newPosts = posts && posts.filter(post => {
+        // console.log(post.category["name"]);
+        if(post.category["name"] !== undefined){
+          return post.category["name"] === query.category
+        }
+      });
+      let postas;
+      const postsFunc = () => {
+        if(req.query.category){
+          postas =  newPosts;
+        } else{
+          postas = posts;
+        }
+        return postas
+      }
+      const postz = postsFunc();
+      // console.log(postz);;
+      const response =  postz && postz.map(post => {
+        const category = post.category.name.replace(' ', '%20')
+        if(post.author){
+          let showPost = {
+            Id: post.id,
+            Title: post.title,
+            Body: post.body,
+            coverImage: post.coverImage,
+            createdAt: post.createdAt,
+            updatedAt: post.updatedAt,
+            Category: post.category,
+            Author: {
+              Id: post.author.id,
+              Username: post.author.username
+            }, 
+            request: {
+              type: 'GET',
+              url: `http://${req.headers.host}/api/posts/${post._id}`,
+              viewByCategory: `http://${req.headers.host}/api/posts?category=${category}`
             }
-          })
-        };
-        res.status(200).json(response);
-
+          };
+          return showPost;
+        }else{
+          return {
+            Post: post,
+            request: {
+              type: 'GET',
+              url: 'http://localhost:4000/api/posts/' + post._id,
+              viewByCategory: `http://${req.headers.host}/api/posts?category=${category}`
+            }
+          };
+        }
+      })
+      // };
+      res.status(200).json({
+        count: postz.length,
+        Posts: response
+      });
     }
+
     catch(err){
       console.log(err);
       res.status(500).json({error: err.message});
@@ -53,7 +83,6 @@ function postsController(Post, Category, User) {
   async function post(req, res, next){
     // console.log(req.file);
     const id = req.body.category;
-    
     try{
       const category = await Category.findById(id);
       // console.log(category);
@@ -62,7 +91,7 @@ function postsController(Post, Category, User) {
             error: "Category does not exist"
           });
         }
-        // console.log(req.file);
+        // console.log(category);
       const post = new Post({
         _id: new mongoose.Types.ObjectId(),
         title: req.body.title,
@@ -72,10 +101,10 @@ function postsController(Post, Category, User) {
       if(req.file){
         post.coverImage= req.file.path;
       }
-      post.user = req.userData.userId
+      post.author = req.userData.userId
       await post.save();
-      console.log(post);
-      console.log(post.user);
+      // console.log(post);
+      // console.log(post.user);
       res.status(201).json({
         message: 'Post was created successfully',
         createdProduct: {
@@ -83,7 +112,7 @@ function postsController(Post, Category, User) {
           body: post.body,
           category: post.category,
           _id: post._id,
-          user: post.user,
+          author: post.author,
           request: {
             type: 'GET',
             url: 'http://localhost:4000/api/posts/' + post._id
@@ -108,8 +137,6 @@ function postsController(Post, Category, User) {
       const post = await Post.findById(id).populate(["author", "category"]);
       // .select("product quantity _id")
       // const user = populate('user');
-    
-        console.log("From database", post);
         if(post){
           if(post.author){
             return res.status(200).json({
@@ -156,7 +183,7 @@ function postsController(Post, Category, User) {
       });
     }
   };
-
+  
   async function updatePost(req, res){
    
     const id = req.params.postId;
