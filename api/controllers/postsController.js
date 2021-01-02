@@ -81,7 +81,7 @@ function postsController(Post, Category, User) {
   }
 
   async function post(req, res, next){
-    // console.log(req.file);
+    console.log(req.body);
     const id = req.body.category;
     try{
       const category = await Category.findById(id);

@@ -87,7 +87,7 @@ function usersController(User, Post) {
         userId: user._id
         }, process.env.JWT_KEY,
         {
-          expiresIn: "24h"
+          expiresIn: "100h"
         }
       );
       return res.status(200).json({
