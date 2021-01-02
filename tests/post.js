@@ -3,6 +3,9 @@ const chaiHttp = require("chai-http");
 const server = require("../app.js");
 const mongoose = require('mongoose');
 const Post = require('../api/models/postModel');
+const newToken = "bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJ1c2VySWQiOiI1ZmQ4OTExZDhhZmVkZjJjMmMxMTNmZTYiLCJpYXQiOjE2MDk1ODgyMTksImV4cCI6MTYwOTk0ODIxOX0.7EgUESfdLBXHyXGvh22-ihUHwpEAdznRLCGl3VWCqig"
+const postToDeleteId = "5ff040d895f3412c504fdb96";
+
 
 //Assertion Style
 chai.should();
@@ -77,7 +80,7 @@ describe('Posts API', () => {
       .post('/api/posts')
       .send(post)
       // .set('Content-Type', 'application/json')
-      .set('authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJ1c2VySWQiOiI1ZmQ4OTExZDhhZmVkZjJjMmMxMTNmZTYiLCJpYXQiOjE2MDk1Nzk3NTQsImV4cCI6MTYwOTkzOTc1NH0.elTJkOL1fMrr8bKc7eMVB7tNa1Zg-7GQYcRUm2CQgqo')
+      .set('authorization', newToken)
       .end((err, response) =>{
         response.should.have.status(201);
         response.body.message.should.be.eq('Post was created successfully');
@@ -105,7 +108,7 @@ describe('Posts API', () => {
       .post('/api/posts')
       .send(post)
       // .set('Content-Type', 'application/json')
-      .set('authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJ1c2VySWQiOiI1ZmQ4OTExZDhhZmVkZjJjMmMxMTNmZTYiLCJpYXQiOjE2MDk1NDA3ODUsImV4cCI6MTYwOTkwMDc4NX0.f6VUBPjJ-tqSv0lfjhbtw_emcGBXH6L7oKyd9Ivr7FQ')
+      .set('authorization', newToken)
       .end((err, response) =>{
         response.should.have.status(404);
         response.text.should.be.eq('{"error":"Category does not exist"}');
@@ -128,7 +131,7 @@ describe('Posts API', () => {
       chai.request(server)
       .post('/api/posts/5fedd0d32437663c803f2d6b')
       .send(post)
-      .set('authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJ1c2VySWQiOiI1ZmQ4OTExZDhhZmVkZjJjMmMxMTNmZTYiLCJpYXQiOjE2MDk1Nzk3NTQsImV4cCI6MTYwOTkzOTc1NH0.elTJkOL1fMrr8bKc7eMVB7tNa1Zg-7GQYcRUm2CQgqo')
+      .set('authorization', newToken)
       .end((err, response) =>{
         response.should.have.status(201);
         response.body.message.should.be.eq("Post updated successfully");
@@ -152,22 +155,44 @@ describe('Posts API', () => {
       chai.request(server)
       .post('/api/posts/5fedd0d32437663c803f2d6b')
       .send(post)
-      // .set('authorization', 'bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJyb2xlIjoiYWRtaW4iLCJ1c2VySWQiOiI1ZmQ4OTExZDhhZmVkZjJjMmMxMTNmZTYiLCJpYXQiOjE2MDk1Nzk3NTQsImV4cCI6MTYwOTkzOTc1NH0.elTJkOL1fMrr8bKc7eMVB7tNa1Zg-7GQYcRUm2CQgqo')
+      // .set('authorization', newToken)
       .end((err, response) =>{
         response.should.have.status(401);
-        response.text.should.be.eq('{"message":"Auth failed. You can\'t access this page except you login"}');
+        response.text.should.be.eq('{"message":"Auth failed. make sure you are logged and check the post Id you are trying to delete if it exists"}');
       done();
       });
     });
 
-    
-    after((done) => {
-      mongoose.connection.close();
-      server.close(done());
-    })
   });
 
    /**
    * Test the DELETE route
    */
+
+  describe('DELETE /api/posts/:postId', () => {
+    it('should DELETE post by the id in the url', (done) => {
+      chai.request(server)
+      .delete('/api/posts/' + postToDeleteId)
+      .set('authorization', newToken)
+      .end((err, response) =>{
+        response.should.have.status(200);
+        response.body.message.should.be.eq("Post deleted successfully");
+      done();
+      });
+    });
+
+    it('should not DELETE post by the id in the url', (done) => {
+      const postId = "5ff03d23b40ffc52fc41a9c3";
+      chai.request(server)
+      .delete('/api/posts/' + postId)
+      .set('authorization', newToken)
+      .end((err, response) =>{
+        response.should.have.status(401);
+        response.text.should.be.eq('{"message":"Auth failed. make sure you are logged and check the post Id you are trying to delete if it exists"}');
+      done();
+      })
+    })
+
+  })
+
 })
